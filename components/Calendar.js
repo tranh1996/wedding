@@ -1,5 +1,4 @@
 import assets from "@/lib/assets.json";
-import { content } from "@/lib/content";
 
 const DOWS = {
   vi: ["T2", "T3", "T4", "T5", "T6", "T7", "CN"],
@@ -15,7 +14,7 @@ function parseDate(str) {
 }
 
 // Port of the original html box: date column on the left, month grid on the right.
-export default function Calendar() {
+export default function Calendar({ content }) {
   const lang = content.calendarLang;
   const parsed = parseDate(content.calendarDate);
   if (!parsed) return null;

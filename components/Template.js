@@ -2,12 +2,13 @@
 
 import { Fragment, useEffect, useRef, useState } from "react";
 import tree from "@/lib/tree.json";
-import { content } from "@/lib/content";
 import Calendar from "./Calendar";
 import MusicToggle from "./MusicToggle";
 
 const VOID = new Set(["br", "img", "input", "hr"]);
 const GIFT_POPUP = "w-2czgudf9";
+// Map query baked into lib/tree.json; swapped for content.mapQuery at render.
+const MAP_QUERY = "Th%C3%B4n%20V%C3%B4%20Song%2C%20B%E1%BA%AFc%20%C4%90%C3%B4ng%20Quan%2C%20H%C6%B0ng%20Y%C3%AAn";
 const THANKS_POPUP = "w-__popup_default__";
 
 function parseStyle(css) {
@@ -42,6 +43,7 @@ function props(node, extra = {}) {
 }
 
 function Countdown({ node, ctx }) {
+  const { content } = ctx;
   const [parts, setParts] = useState(() => countdownParts(content.weddingDate, new Date(content.weddingDate).getTime()));
   useEffect(() => {
     const tick = () => setParts(countdownParts(content.weddingDate, Date.now()));
@@ -52,7 +54,7 @@ function Countdown({ node, ctx }) {
   return <div {...props(node)}>{(node.c ?? []).map((c, i) => render(c, i, { ...ctx, countdown: parts }))}</div>;
 }
 
-// ctx: { owner, popup, setPopup, onSubmit, countdown }
+// ctx: { content, owner, popup, setPopup, onSubmit, countdown }
 function render(node, key, ctx) {
   if (typeof node === "string") return node;
   const { t: Tag, a, c } = node;
@@ -60,7 +62,7 @@ function render(node, key, ctx) {
   const cls = a.className ?? "";
 
   if (id === "w-0dyp082l") return <div key={key} {...props(node)}><div className="frame-html-box full-width full-height"><MusicToggle /></div></div>;
-  if (id === "w-niirgp9l") return <div key={key} {...props(node)}><div className="frame-html-box full-width full-height"><Calendar /></div></div>;
+  if (id === "w-niirgp9l") return <div key={key} {...props(node)}><div className="frame-html-box full-width full-height"><Calendar content={ctx.content} /></div></div>;
   if (cls.includes("com-countdown")) return <Countdown key={key} node={node} ctx={ctx} />;
 
   const extra = {};
@@ -85,8 +87,8 @@ function render(node, key, ctx) {
   // text replaced from lib/content.js
   let owner = ctx.owner;
   if (cls.includes("com-text-block")) owner = id;
-  if (cls.includes("text-block-css") && content.texts[owner] !== undefined) {
-    kids = [content.texts[owner]];
+  if (cls.includes("text-block-css") && ctx.content.texts[owner] !== undefined) {
+    kids = [ctx.content.texts[owner]];
     extra.style = { whiteSpace: "pre-line" };
   }
 
@@ -95,13 +97,16 @@ function render(node, key, ctx) {
   if (unit && ctx.countdown && c) kids = [{ ...c[0], c: [ctx.countdown[unit]] }, ...c.slice(1)];
 
   const p = props(node, extra);
+  for (const k of ["src", "href", "title"]) {
+    if (typeof p[k] === "string" && p[k].includes(MAP_QUERY)) p[k] = p[k].replace(MAP_QUERY, encodeURIComponent(ctx.content.mapQuery));
+  }
   if (Tag === "option") delete p.selected;
   const childCtx = { ...ctx, owner };
   if (VOID.has(Tag)) return <Tag key={key} {...p} />;
   return <Tag key={key} {...p}>{(kids ?? []).map((k, i) => render(k, i, childCtx))}</Tag>;
 }
 
-export default function Template() {
+export default function Template({ content }) {
   const [popup, setPopup] = useState(null);
   const root = useRef(null);
 
@@ -129,6 +134,7 @@ export default function Template() {
         name: data.get("full_name"),
         relation: data.get("text_input_1"),
         message: data.get("text_input_2"),
+        side: content.side,
         attending: data.get("select_1") === "Có Tham Dự",
       }),
     }).catch(() => null);
@@ -138,7 +144,7 @@ export default function Template() {
     }
   };
 
-  const ctx = { owner: null, popup, setPopup, onSubmit, countdown: null };
+  const ctx = { content, owner: null, popup, setPopup, onSubmit, countdown: null };
   return (
     <div className="pageview" ref={root}>
       {tree.map((n, i) => <Fragment key={i}>{render(n, i, ctx)}</Fragment>)}

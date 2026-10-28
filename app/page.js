@@ -1,5 +1,5 @@
-import Template from "@/components/Template";
+import { redirect } from "next/navigation";
 
 export default function Page() {
-  return <Template />;
+  redirect("/nha-trai");
 }
