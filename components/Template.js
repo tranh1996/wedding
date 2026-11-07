@@ -16,7 +16,7 @@ const ALBUM_COUNT = 7;
 // The first (full-width) album slot w-hiz4kjo9 always shows album/04.jpg (set in template.css);
 // that photo is left out of the shuffle so it never repeats.
 const ALBUM_FIXED = 4;
-const ALBUM_SLOTS = ["w-1fom54h6", "w-pgg5h6r3", "w-d83g3hhq", "w-mdl4wa9d", "w-e8h3vgem", "w-ifbchb12"];
+const ALBUM_SLOTS = ["w-1fom54h6", "w-d83g3hhq", "w-mdl4wa9d", "w-e8h3vgem", "w-ifbchb12"];
 
 function parseStyle(css) {
   const out = {};
@@ -172,7 +172,7 @@ export default function Template({ content }) {
 
   const ctx = { content, owner: null, popup, setPopup, onSubmit, countdown: null };
   return (
-    <div className="pageview" ref={root}>
+    <div className={`pageview side-${content.side}`} ref={root}>
       {tree.map((n, i) => <Fragment key={i}>{render(n, i, ctx)}</Fragment>)}
       <footer className="site-footer">— Made with ♥ by Tranh Nguyễn —</footer>
     </div>
