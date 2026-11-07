@@ -231,9 +231,12 @@
 #w-ymu2ki52 .image-background{top:0;left:0;width:100%;height:100%;background:url("/images/gift.webp") center/cover no-repeat !important;}
 /* No fade over the hero photo (top of page): hide its gradient overlay */
 #w-jjjgn5ag{display:none !important;}
-/* Bride's page: no RSVP form and no gift/QR button; keep the countdown and shrink the section (countdown ends at 93px) */
-.side-bride #w-xq65tl7w,
-.side-bride #w-noyvu32w{display:none !important;}
+/* Gift/QR button hidden on both pages.
+   Groom page: RSVP form stays, section shrinks to end below the form (form ends at 357px).
+   Bride page: RSVP form hidden too, only the countdown stays (it ends at 93px). */
+#w-noyvu32w{display:none !important;}
+.side-groom #w-5k5h3bb0{height:380px !important;}
+.side-bride #w-xq65tl7w{display:none !important;}
 .side-bride #w-5k5h3bb0{height:110px !important;}
 /* Music button: while playing, show the animated (spinning) GIF icon instead of the old pulse */
 #music-toggle.vibrating{animation:none;}
