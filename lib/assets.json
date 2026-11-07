@@ -1,6 +1,6 @@
 {
   "music": "/music.mp3",
-  "playIcon": "/images/slot-24.png",
-  "pauseIcon": "/images/slot-25.png",
+  "playIcon": "/images/music-off.png",
+  "pauseIcon": "/images/music-on.gif",
   "heart": "/images/heart-outline.svg"
 }
