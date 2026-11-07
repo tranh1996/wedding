@@ -239,6 +239,13 @@
 #music-toggle.vibrating{animation:none;}
 /* Never let the page scroll sideways: stops phones from opening off-centre when something is wider than the screen */
 html,body{overflow-x:hidden;}
+/* Last photo (Thank You): the bottom fade began abruptly and showed a horizontal line about 3/4 down.
+   Start higher and ease the alpha with one colour. The child is rotated 180deg, so 0% here is the bottom edge. */
+#w-dmt6sn39{top:380px !important;height:229px !important;}
+#w-dmt6sn39 .rectangle-css{background:linear-gradient(to bottom,
+  rgba(248,253,255,1) 0%, rgba(248,253,255,.92) 10%, rgba(248,253,255,.72) 25%,
+  rgba(248,253,255,.48) 40%, rgba(248,253,255,.27) 55%, rgba(248,253,255,.12) 70%,
+  rgba(248,253,255,.04) 85%, rgba(248,253,255,0) 100%) !important;}
 /* Footer credit */
 .site-footer{padding:14px 0 18px;text-align:center;font-size:12px;color:rgba(69,64,64,.6);background:rgb(248,253,255);}
 /* Popups (gift QR, thank-you) must sit above the dark backdrop (z-index 1000000), otherwise they look dimmed */
