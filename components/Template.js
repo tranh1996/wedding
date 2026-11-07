@@ -10,6 +10,13 @@ const GIFT_POPUP = "w-2czgudf9";
 // Map query baked into lib/tree.json; swapped for content.mapQuery at render.
 const MAP_QUERY = "Th%C3%B4n%20V%C3%B4%20Song%2C%20B%E1%BA%AFc%20%C4%90%C3%B4ng%20Quan%2C%20H%C6%B0ng%20Y%C3%AAn";
 const THANKS_POPUP = "w-__popup_default__";
+// Album at the bottom: photos in /public/images/album/01..N.jpg are shuffled into these
+// slots on every page load. Add more photos and bump ALBUM_COUNT to widen the pool.
+const ALBUM_COUNT = 7;
+// The first (full-width) album slot w-hiz4kjo9 always shows album/04.jpg (set in template.css);
+// that photo is left out of the shuffle so it never repeats.
+const ALBUM_FIXED = 4;
+const ALBUM_SLOTS = ["w-1fom54h6", "w-pgg5h6r3", "w-d83g3hhq", "w-mdl4wa9d", "w-e8h3vgem", "w-ifbchb12"];
 
 function parseStyle(css) {
   const out = {};
@@ -123,6 +130,25 @@ export default function Template({ content }) {
     return () => io.disconnect();
   }, []);
 
+  // Gift popup QR: image comes from content.qrImage (per family).
+  useEffect(() => {
+    const el = root.current.querySelector("#w-ynp4k50a .image-background");
+    if (el && content.qrImage) el.style.backgroundImage = `url(${content.qrImage})`;
+  }, [content.qrImage]);
+
+  // Random album: give each slot a different photo from the pool.
+  useEffect(() => {
+    const pool = Array.from({ length: ALBUM_COUNT }, (_, i) => i + 1).filter((n) => n !== ALBUM_FIXED);
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    ALBUM_SLOTS.forEach((id, i) => {
+      const el = root.current.querySelector("#" + id + " .image-background");
+      if (el) el.style.backgroundImage = `url(/images/album/${String(pool[i]).padStart(2, "0")}.jpg)`;
+    });
+  }, []);
+
   const onSubmit = async (e) => {
     e.preventDefault();
     const form = e.currentTarget;
@@ -148,6 +174,7 @@ export default function Template({ content }) {
   return (
     <div className="pageview" ref={root}>
       {tree.map((n, i) => <Fragment key={i}>{render(n, i, ctx)}</Fragment>)}
+      <footer className="site-footer">— Made with ♥ by Tranh Nguyễn —</footer>
     </div>
   );
 }
