@@ -8,6 +8,7 @@ import MusicToggle from "./MusicToggle";
 const VOID = new Set(["br", "img", "input", "hr"]);
 const GIFT_POPUP = "w-2czgudf9";
 const UNDECIDED = "Chưa chốt được";
+const DECLINE = "Xin lỗi mình bận rồi"; // replaces the original "Không Thể Tham Dự" option
 // Map query baked into lib/tree.json; swapped for content.mapQuery at render.
 const MAP_QUERY = "Th%C3%B4n%20V%C3%B4%20Song%2C%20B%E1%BA%AFc%20%C4%90%C3%B4ng%20Quan%2C%20H%C6%B0ng%20Y%C3%AAn";
 const THANKS_POPUP = "w-__popup_default__";
@@ -116,6 +117,10 @@ function render(node, key, ctx) {
     if (typeof p[k] === "string" && p[k].includes(MAP_QUERY)) p[k] = p[k].replace(MAP_QUERY, encodeURIComponent(ctx.content.mapQuery));
   }
   if (Tag === "option") delete p.selected;
+  if (Tag === "option" && p.value === "Không Thể Tham Dự") {
+    p.value = DECLINE;
+    kids = [DECLINE];
+  }
   if (Tag === "option" && p.value === "Đi xe của chú rể thuê" && ctx.content.carOption) {
     p.value = ctx.content.carOption;
     kids = [ctx.content.carOption];
