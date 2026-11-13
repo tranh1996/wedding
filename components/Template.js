@@ -7,6 +7,7 @@ import MusicToggle from "./MusicToggle";
 
 const VOID = new Set(["br", "img", "input", "hr"]);
 const GIFT_POPUP = "w-2czgudf9";
+const UNDECIDED = "Chưa chốt được";
 // Map query baked into lib/tree.json; swapped for content.mapQuery at render.
 const MAP_QUERY = "Th%C3%B4n%20V%C3%B4%20Song%2C%20B%E1%BA%AFc%20%C4%90%C3%B4ng%20Quan%2C%20H%C6%B0ng%20Y%C3%AAn";
 const THANKS_POPUP = "w-__popup_default__";
@@ -91,6 +92,10 @@ function render(node, key, ctx) {
   if (id === "w-i72hlok0") extra.onClick = (e) => e.currentTarget.closest("form").requestSubmit();
   if (Tag === "form") extra.onSubmit = ctx.onSubmit;
   if (Tag === "select") extra.defaultValue = "";
+  // transport + friday selects get an extra "not decided yet" answer
+  if (Tag === "select" && (a.name === "transport" || a.name === "friday")) {
+    kids = [...c, { t: "option", a: { value: UNDECIDED }, c: [UNDECIDED] }];
+  }
   // "Bạn có tham dự không?": transport + "về từ thứ 6" selects only show after "Có Tham Dự"
   if (Tag === "select" && node.a.name === "select_1") extra.onChange = (e) => ctx.setAttending(e.target.value === ATTENDING_YES);
 
