@@ -1,3 +1,5 @@
+import { promises as fs } from "node:fs";
+import path from "node:path";
 import nodemailer from "nodemailer";
 import { JWT } from "google-auth-library";
 
@@ -8,20 +10,41 @@ const SIDES = {
 };
 const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 
-// Appends one row to the "RSVP" tab: time, side, name, relation, attending, message.
+// Appends one row to the "RSVP" tab: time, side, name, attending, transport, arrives Friday, message.
 async function appendToSheet(entry, sideLabel) {
   const auth = new JWT({
     email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
     key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
     scopes: ["https://www.googleapis.com/auth/spreadsheets"],
   });
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${process.env.GOOGLE_SHEET_ID}/values/RSVP!A:F:append?valueInputOption=USER_ENTERED`;
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${process.env.GOOGLE_SHEET_ID}/values/RSVP!A:G:append?valueInputOption=USER_ENTERED`;
   const res = await auth.request({
     url,
     method: "POST",
-    data: { values: [[entry.at, sideLabel, entry.name, entry.relation, entry.attending ? "Có" : "Không", entry.message]] },
+    data: { values: [[entry.at, sideLabel, entry.name, entry.attending ? "Có" : "Không", entry.transport, entry.friday, entry.message]] },
   });
   return res.status;
+}
+
+// Local backup: every reply is also appended to data/rsvp.json (git-ignored).
+// Only persists on a long-running server (next start); serverless hosts drop it on redeploy.
+const RSVP_FILE = path.join(process.cwd(), "data", "rsvp.json");
+let fileQueue = Promise.resolve(); // serialise writes so two submits never overwrite each other
+
+function appendToFile(entry, sideLabel) {
+  const run = async () => {
+    let items = [];
+    try {
+      items = JSON.parse(await fs.readFile(RSVP_FILE, "utf8"));
+    } catch (e) {
+      if (e.code !== "ENOENT") throw e; // never overwrite a file we failed to parse
+    }
+    items.push({ ...entry, side: sideLabel });
+    await fs.mkdir(path.dirname(RSVP_FILE), { recursive: true });
+    await fs.writeFile(RSVP_FILE, JSON.stringify(items, null, 2));
+  };
+  fileQueue = fileQueue.then(run, run);
+  return fileQueue;
 }
 
 async function sendMail(entry, side) {
@@ -35,14 +58,16 @@ async function sendMail(entry, side) {
     from: process.env.GMAIL_USER,
     to,
     subject: `[${side.label}] ${entry.name} - ${entry.attending ? "Có tham dự" : "Không tham dự"}`,
-    html: `<p><b>${esc(entry.name)}</b> (${esc(entry.relation)})</p>
+    html: `<p><b>${esc(entry.name)}</b></p>
 <p>${entry.attending ? "Có tham dự" : "Không tham dự"}</p>
+<p>Di chuyển: ${esc(entry.transport) || "—"}</p>
+<p>Về trước 1 ngày (thứ 6): ${esc(entry.friday) || "—"}</p>
 <p>${esc(entry.message).replace(/\n/g, "<br>")}</p>`,
   });
 }
 
-// No public GET: guest names stay private. Sheet + mail are independent; the request
-// only fails if both do.
+// No public GET: guest names stay private. File, sheet and mail are independent; the
+// request only fails if all three do.
 export async function POST(req) {
   const body = await req.json().catch(() => null);
   const name = clean(body?.name, 80);
@@ -50,12 +75,17 @@ export async function POST(req) {
   const side = SIDES[body?.side] ?? SIDES.groom;
   const entry = {
     name,
-    relation: clean(body?.relation, 80),
+    transport: clean(body?.transport, 80),
+    friday: clean(body?.friday, 80),
     message: clean(body?.message, 500),
     attending: !!body?.attending,
     at: new Date().toISOString(),
   };
-  const results = await Promise.allSettled([appendToSheet(entry, side.label), sendMail(entry, side)]);
+  const results = await Promise.allSettled([
+    appendToFile(entry, side.label),
+    appendToSheet(entry, side.label),
+    sendMail(entry, side),
+  ]);
   results.forEach((r) => r.status === "rejected" && console.error("rsvp:", r.reason));
   if (results.every((r) => r.status === "rejected")) {
     return Response.json({ error: "Không gửi được, vui lòng thử lại" }, { status: 500 });

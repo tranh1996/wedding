@@ -1,5 +1,8 @@
-import { redirect } from "next/navigation";
+import Template from "@/components/Template";
+import { groom } from "@/lib/content";
+
+export const metadata = { title: "Thiệp cưới" };
 
 export default function Page() {
-  redirect("/nha-trai");
+  return <Template content={groom} />;
 }

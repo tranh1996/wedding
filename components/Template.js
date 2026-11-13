@@ -10,6 +10,7 @@ const GIFT_POPUP = "w-2czgudf9";
 // Map query baked into lib/tree.json; swapped for content.mapQuery at render.
 const MAP_QUERY = "Th%C3%B4n%20V%C3%B4%20Song%2C%20B%E1%BA%AFc%20%C4%90%C3%B4ng%20Quan%2C%20H%C6%B0ng%20Y%C3%AAn";
 const THANKS_POPUP = "w-__popup_default__";
+const ATTENDING_YES = "Có Tham Dự";
 // Album at the bottom: photos in /public/images/album/01..N.jpg are shuffled into these
 // slots on every page load. Add more photos and bump ALBUM_COUNT to widen the pool.
 const ALBUM_COUNT = 7;
@@ -90,6 +91,8 @@ function render(node, key, ctx) {
   if (id === "w-i72hlok0") extra.onClick = (e) => e.currentTarget.closest("form").requestSubmit();
   if (Tag === "form") extra.onSubmit = ctx.onSubmit;
   if (Tag === "select") extra.defaultValue = "";
+  // "Bạn có tham dự không?": transport + "về từ thứ 6" selects only show after "Có Tham Dự"
+  if (Tag === "select" && node.a.name === "select_1") extra.onChange = (e) => ctx.setAttending(e.target.value === ATTENDING_YES);
 
   // text replaced from lib/content.js
   let owner = ctx.owner;
@@ -115,6 +118,7 @@ function render(node, key, ctx) {
 
 export default function Template({ content }) {
   const [popup, setPopup] = useState(null);
+  const [attending, setAttending] = useState(false);
   const root = useRef(null);
 
   // Scroll-triggered animations: add .animation when an .is-animation element enters the viewport.
@@ -153,26 +157,32 @@ export default function Template({ content }) {
     e.preventDefault();
     const form = e.currentTarget;
     const data = new FormData(form);
+    const yes = data.get("select_1") === ATTENDING_YES;
     const res = await fetch("/api/rsvp", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         name: data.get("full_name"),
-        relation: data.get("text_input_1"),
+        transport: yes ? data.get("transport") : "",
+        friday: yes ? data.get("friday") : "",
         message: data.get("text_input_2"),
         side: content.side,
-        attending: data.get("select_1") === "Có Tham Dự",
+        attending: yes,
       }),
     }).catch(() => null);
     if (res?.ok) {
       form.reset();
+      setAttending(false);
       setPopup(THANKS_POPUP);
+      return;
     }
+    const err = await res?.json().catch(() => null);
+    alert(err?.error ?? "Không gửi được, vui lòng kiểm tra mạng và thử lại");
   };
 
-  const ctx = { content, owner: null, popup, setPopup, onSubmit, countdown: null };
+  const ctx = { content, owner: null, popup, setPopup, setAttending, onSubmit, countdown: null };
   return (
-    <div className={`pageview side-${content.side}`} ref={root}>
+    <div className={`pageview side-${content.side}${attending ? " rsvp-yes" : ""}`} ref={root}>
       {tree.map((n, i) => <Fragment key={i}>{render(n, i, ctx)}</Fragment>)}
       <footer className="site-footer">— Made with ♥ by Tranh Nguyễn —</footer>
     </div>

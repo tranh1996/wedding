@@ -231,11 +231,10 @@
 #w-ymu2ki52 .image-background{top:0;left:0;width:100%;height:100%;background:url("/images/gift.webp") center/cover no-repeat !important;}
 /* No fade over the hero photo (top of page): hide its gradient overlay */
 #w-jjjgn5ag{display:none !important;}
-/* Gift/QR button hidden on both pages.
-   Groom page: RSVP form stays, section shrinks to end below the form (form ends at 357px).
+/* Gift/QR button ("Gửi mừng cưới"): shown on the groom page (/), hidden on the bride page.
+   Groom page: it sits under the RSVP form; positions are in the RSVP form block at the end of this file.
    Bride page: RSVP form hidden too, only the countdown stays (it ends at 93px). */
-#w-noyvu32w{display:none !important;}
-.side-groom #w-5k5h3bb0{height:380px !important;}
+.side-bride #w-noyvu32w{display:none !important;}
 .side-bride #w-xq65tl7w{display:none !important;}
 .side-bride #w-5k5h3bb0{height:110px !important;}
 /* Music button: while playing, show the animated (spinning) GIF icon instead of the old pulse */
@@ -267,3 +266,25 @@ html,body{overflow-x:hidden;}
   rgba(248,253,255,0) 0%, rgba(248,253,255,.04) 15%, rgba(248,253,255,.12) 30%,
   rgba(248,253,255,.27) 45%, rgba(248,253,255,.48) 60%, rgba(248,253,255,.72) 75%,
   rgba(248,253,255,.92) 90%, rgba(248,253,255,1) 100%);}
+
+/* RSVP form order: name, "Bạn có tham dự không?", [transport, về từ thứ 6], lời chúc, button.
+   The two bracketed selects only show once the guest picks "Có Tham Dự" (.rsvp-yes on .pageview, set in
+   components/Template.js); the message, button, gift/QR button, form and section then move down 100px. */
+.side-groom #w-5k5h3bb0{height:539px !important;}
+#w-xq65tl7w{height:196px !important;}
+#w-fi4pwa3q{top:53px !important;}
+#w-hv93iqgh{top:106px !important;display:none;}
+#w-friday01{top:156px;left:0px;width:336px;height:40px;display:none;}
+#w-chtvletl{top:106px !important;}
+#w-i72hlok0{top:156px !important;}
+.rsvp-yes #w-hv93iqgh,.rsvp-yes #w-friday01{display:block;}
+.rsvp-yes #w-chtvletl{top:206px !important;}
+.rsvp-yes #w-i72hlok0{top:256px !important;}
+.rsvp-yes #w-xq65tl7w{height:296px !important;}
+.side-groom.rsvp-yes #w-5k5h3bb0{height:639px !important;}
+/* Gift/QR button under the form (150px tall, same ~40px gaps as the original layout) */
+#w-noyvu32w{top:350px !important;}
+.rsvp-yes #w-noyvu32w{top:450px !important;}
+#w-hv93iqgh .select-css,#w-friday01 .select-css{border-color:rgba(0, 0, 0, 1);border-radius:0px;border-style:double;border-width:1px;color:rgba(0,0,0,0.400);}
+#w-hv93iqgh select,#w-friday01 select{background:rgba(255, 255, 255, 1);color:rgba(0,0,0,0.400);}
+#w-hv93iqgh .chevron .icon,#w-friday01 .chevron .icon{color:rgba(0,0,0,0.400);}
