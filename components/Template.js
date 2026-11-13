@@ -111,6 +111,10 @@ function render(node, key, ctx) {
     if (typeof p[k] === "string" && p[k].includes(MAP_QUERY)) p[k] = p[k].replace(MAP_QUERY, encodeURIComponent(ctx.content.mapQuery));
   }
   if (Tag === "option") delete p.selected;
+  if (Tag === "option" && p.value === "Đi xe của chú rể thuê" && ctx.content.carOption) {
+    p.value = ctx.content.carOption;
+    kids = [ctx.content.carOption];
+  }
   const childCtx = { ...ctx, owner };
   if (VOID.has(Tag)) return <Tag key={key} {...p} />;
   return <Tag key={key} {...p}>{(kids ?? []).map((k, i) => render(k, i, childCtx))}</Tag>;
