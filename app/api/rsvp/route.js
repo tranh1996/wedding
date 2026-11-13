@@ -81,11 +81,11 @@ export async function POST(req) {
     attending: !!body?.attending,
     at: new Date().toISOString(),
   };
-  const results = await Promise.allSettled([
-    appendToFile(entry, side.label),
-    appendToSheet(entry, side.label),
-    sendMail(entry, side),
-  ]);
+  // Serverless hosts (Vercel) have a read-only filesystem, so the local backup is skipped there
+  // and the sheet + mail are the record.
+  const tasks = [appendToSheet(entry, side.label), sendMail(entry, side)];
+  if (!process.env.VERCEL) tasks.push(appendToFile(entry, side.label));
+  const results = await Promise.allSettled(tasks);
   results.forEach((r) => r.status === "rejected" && console.error("rsvp:", r.reason));
   if (results.every((r) => r.status === "rejected")) {
     return Response.json({ error: "Không gửi được, vui lòng thử lại" }, { status: 500 });
