@@ -97,7 +97,7 @@ function render(node, key, ctx) {
   if (Tag === "select" && (a.name === "transport" || a.name === "friday")) {
     kids = [...c, { t: "option", a: { value: UNDECIDED }, c: [UNDECIDED] }];
   }
-  // "Bạn có tham dự không?": transport + "về từ thứ 6" selects only show after "Có Tham Dự"
+  // "Bạn có tham dự không?": transport + "Bạn đến chung vui từ lúc nào?" (friday) selects only show after "Có Tham Dự"
   if (Tag === "select" && node.a.name === "select_1") extra.onChange = (e) => ctx.setAttending(e.target.value === ATTENDING_YES);
 
   // text replaced from lib/content.js

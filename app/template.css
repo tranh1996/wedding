@@ -263,7 +263,7 @@ html,body{overflow-x:hidden;}
   rgba(248,253,255,.27) 45%, rgba(248,253,255,.48) 60%, rgba(248,253,255,.72) 75%,
   rgba(248,253,255,.92) 90%, rgba(248,253,255,1) 100%);}
 
-/* RSVP form order: name, "Bạn có tham dự không?", [transport, về từ thứ 6], lời chúc, button.
+/* RSVP form order: name, "Bạn có tham dự không?", [transport, "Bạn đến chung vui từ lúc nào?"], lời chúc, button.
    The two bracketed selects only show once the guest picks "Có Tham Dự" (.rsvp-yes on .pageview, set in
    components/Template.js); the message, button, gift/QR button, form and section then move down 100px. */
 #w-5k5h3bb0{height:539px !important;}

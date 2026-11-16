@@ -61,7 +61,7 @@ async function sendMail(entry, side) {
     html: `<p><b>${esc(entry.name)}</b></p>
 <p>${entry.attending ? "Có tham dự" : "Không tham dự"}</p>
 <p>Di chuyển: ${esc(entry.transport) || "—"}</p>
-<p>Về trước 1 ngày (thứ 6): ${esc(entry.friday) || "—"}</p>
+<p>Đến từ: ${esc(entry.friday) || "—"}</p>
 <p>${esc(entry.message).replace(/\n/g, "<br>")}</p>`,
   });
 }
