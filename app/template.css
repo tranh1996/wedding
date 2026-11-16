@@ -263,24 +263,24 @@ html,body{overflow-x:hidden;}
   rgba(248,253,255,.27) 45%, rgba(248,253,255,.48) 60%, rgba(248,253,255,.72) 75%,
   rgba(248,253,255,.92) 90%, rgba(248,253,255,1) 100%);}
 
-/* RSVP form order: name, phone, "Bạn có tham dự không?", [transport, "Bạn đến chung vui từ lúc nào?"], lời chúc, button.
-   The two bracketed selects only show once the guest picks "Có Tham Dự" (.rsvp-yes on .pageview, set in
-   components/Template.js); the message, button, gift/QR button, form and section then move down 100px. */
-#w-5k5h3bb0{height:592px !important;}
-#w-xq65tl7w{height:249px !important;}
-#w-phone001{top:53px;left:0px;width:336px;height:40px;}
-#w-fi4pwa3q{top:106px !important;}
+/* RSVP form order: name, "Bạn có tham dự không?", [phone, transport, "Bạn đến chung vui từ lúc nào?"], lời chúc, button.
+   The three bracketed fields only show once the guest picks "Có Tham Dự" (.rsvp-yes on .pageview, set in
+   components/Template.js); the message, button, gift/QR button, form and section then move down 153px. */
+#w-5k5h3bb0{height:539px !important;}
+#w-xq65tl7w{height:196px !important;}
+#w-fi4pwa3q{top:53px !important;}
+#w-phone001{top:106px;left:0px;width:336px;height:40px;display:none;}
 #w-hv93iqgh{top:159px !important;display:none;}
 #w-friday01{top:209px;left:0px;width:336px;height:40px;display:none;}
-#w-chtvletl{top:159px !important;}
-#w-i72hlok0{top:209px !important;}
-.rsvp-yes #w-hv93iqgh,.rsvp-yes #w-friday01{display:block;}
+#w-chtvletl{top:106px !important;}
+#w-i72hlok0{top:156px !important;}
+.rsvp-yes #w-phone001,.rsvp-yes #w-hv93iqgh,.rsvp-yes #w-friday01{display:block;}
 .rsvp-yes #w-chtvletl{top:259px !important;}
 .rsvp-yes #w-i72hlok0{top:309px !important;}
 .rsvp-yes #w-xq65tl7w{height:349px !important;}
 .rsvp-yes #w-5k5h3bb0{height:692px !important;}
 /* Gift/QR button under the form (150px tall, same ~40px gaps as the original layout) */
-#w-noyvu32w{top:403px !important;}
+#w-noyvu32w{top:350px !important;}
 .rsvp-yes #w-noyvu32w{top:503px !important;}
 /* Phone input: same look as the name input */
 #w-phone001 .input-css{border-color:rgba(0, 0, 0, 1);border-radius:0px;border-style:double;border-width:1px;color:rgba(0,0,0,0.400);}
