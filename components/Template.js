@@ -90,7 +90,14 @@ function render(node, key, ctx) {
   // click targets
   if (id === "w-noyvu32w") extra.onClick = () => ctx.setPopup(GIFT_POPUP); // "Gửi mừng cưới" group
   if (id === "w-mcd6y7dt" || id === "w-au0o7yap") extra.onClick = () => ctx.setPopup(null); // popup close rectangles
-  if (id === "w-i72hlok0") extra.onClick = (e) => e.currentTarget.closest("form").requestSubmit();
+  if (id === "w-i72hlok0") {
+    extra.onClick = (e) => e.currentTarget.closest("form").requestSubmit();
+    // submit button shows a spinner + "Đang gửi..." while the RSVP is being sent (styles in template.css)
+    if (ctx.sending) {
+      extra.className = `${cls} is-sending`;
+      extra["aria-busy"] = true;
+    }
+  }
   if (Tag === "form") extra.onSubmit = ctx.onSubmit;
   if (Tag === "select") extra.defaultValue = "";
   // transport + friday selects get an extra "not decided yet" answer
@@ -142,6 +149,8 @@ function render(node, key, ctx) {
 export default function Template({ content }) {
   const [popup, setPopup] = useState(null);
   const [attending, setAttending] = useState(false);
+  const [sending, setSending] = useState(false);
+  const sendingRef = useRef(false); // blocks a second submit before the state update re-renders
   const root = useRef(null);
 
   // Scroll-triggered animations: add .animation when an .is-animation element enters the viewport.
@@ -178,14 +187,18 @@ export default function Template({ content }) {
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    if (sendingRef.current) return;
     const form = e.currentTarget;
     const data = new FormData(form);
     const yes = data.get("select_1") === ATTENDING_YES;
+    sendingRef.current = true;
+    setSending(true);
     const res = await fetch("/api/rsvp", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         name: data.get("full_name"),
+        phone: data.get("phone"),
         transport: yes ? data.get("transport") : "",
         friday: yes ? data.get("friday") : "",
         message: data.get("text_input_2"),
@@ -193,6 +206,8 @@ export default function Template({ content }) {
         attending: yes,
       }),
     }).catch(() => null);
+    sendingRef.current = false;
+    setSending(false);
     if (res?.ok) {
       form.reset();
       setAttending(false);
@@ -203,7 +218,7 @@ export default function Template({ content }) {
     alert(err?.error ?? "Không gửi được, vui lòng kiểm tra mạng và thử lại");
   };
 
-  const ctx = { content, owner: null, popup, setPopup, setAttending, onSubmit, countdown: null };
+  const ctx = { content, owner: null, popup, setPopup, setAttending, sending, onSubmit, countdown: null };
   return (
     <div className={`pageview side-${content.side}${attending ? " rsvp-yes" : ""}`} ref={root}>
       {tree.map((n, i) => <Fragment key={i}>{render(n, i, ctx)}</Fragment>)}

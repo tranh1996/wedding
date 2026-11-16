@@ -10,18 +10,19 @@ const SIDES = {
 };
 const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 
-// Appends one row to the "RSVP" tab: time, side, name, attending, transport, arrives Friday, message.
+// Appends one row to the "RSVP" tab: time, side, name, phone, attending, transport, arrives from, message.
+// The phone is prefixed with ' so Sheets keeps it as text (otherwise "0912..." loses its leading 0).
 async function appendToSheet(entry, sideLabel) {
   const auth = new JWT({
     email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
     key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
     scopes: ["https://www.googleapis.com/auth/spreadsheets"],
   });
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${process.env.GOOGLE_SHEET_ID}/values/RSVP!A:G:append?valueInputOption=USER_ENTERED`;
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${process.env.GOOGLE_SHEET_ID}/values/RSVP!A:H:append?valueInputOption=USER_ENTERED`;
   const res = await auth.request({
     url,
     method: "POST",
-    data: { values: [[entry.at, sideLabel, entry.name, entry.attending ? "Có" : "Không", entry.transport, entry.friday, entry.message]] },
+    data: { values: [[entry.at, sideLabel, entry.name, entry.phone ? `'${entry.phone}` : "", entry.attending ? "Có" : "Không", entry.transport, entry.friday, entry.message]] },
   });
   return res.status;
 }
@@ -58,7 +59,7 @@ async function sendMail(entry, side) {
     from: process.env.GMAIL_USER,
     to,
     subject: `[${side.label}] ${entry.name} - ${entry.attending ? "Có tham dự" : "Không tham dự"}`,
-    html: `<p><b>${esc(entry.name)}</b></p>
+    html: `<p><b>${esc(entry.name)}</b>${entry.phone ? ` - ${esc(entry.phone)}` : ""}</p>
 <p>${entry.attending ? "Có tham dự" : "Không tham dự"}</p>
 <p>Di chuyển: ${esc(entry.transport) || "—"}</p>
 <p>Đến từ: ${esc(entry.friday) || "—"}</p>
@@ -75,7 +76,8 @@ export async function POST(req) {
   const side = SIDES[body?.side] ?? SIDES.groom;
   const entry = {
     name,
-    transport: clean(body?.transport, 80),
+    phone: clean(body?.phone, 20),
+    transport: clean(body?.transport, 120),
     friday: clean(body?.friday, 80),
     message: clean(body?.message, 500),
     attending: !!body?.attending,
