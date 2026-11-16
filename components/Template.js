@@ -125,6 +125,15 @@ function render(node, key, ctx) {
     p.value = ctx.content.carOption;
     kids = [ctx.content.carOption];
   }
+  if (Tag === "option" && p.value === "Chỉ chiều thứ 7 thôi" && ctx.content.afternoonOption === false) return null;
+  if (Tag === "option" && p.value === "Chỉ chiều thứ 7 thôi" && ctx.content.afternoonOption) {
+    p.value = ctx.content.afternoonOption;
+    kids = [ctx.content.afternoonOption];
+  }
+  if (Tag === "option" && p.value === "Sáng thứ 7 (tham dự lễ thành hôn)" && ctx.content.morningOption) {
+    p.value = ctx.content.morningOption;
+    kids = [ctx.content.morningOption];
+  }
   const childCtx = { ...ctx, owner };
   if (VOID.has(Tag)) return <Tag key={key} {...p} />;
   return <Tag key={key} {...p}>{(kids ?? []).map((k, i) => render(k, i, childCtx))}</Tag>;
